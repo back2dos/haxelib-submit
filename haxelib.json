@@ -4,6 +4,7 @@
 	"classPath": "src",
 	"releasenote": "First release.",
 	"version": "0.1.0",
+  "license": "MIT",
 	"contributors": ["back2dos"],
 	"dependencies": {
 		"tink_core": ""
