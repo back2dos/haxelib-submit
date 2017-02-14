@@ -1,0 +1,8 @@
+{
+  "name": "submit",
+  "classPath": ".",
+  "main": "Prepare",
+  "dependencies": {
+	"tink_core": ""
+  }
+}
