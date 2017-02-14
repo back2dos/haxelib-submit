@@ -1,8 +1,10 @@
 {
-  "name": "submit",
-  "classPath": "src",
-  "main": "Prepare",
-  "dependencies": {
-     "tink_core": ""
-  }
+	"main": "Prepare",
+	"name": "submit",
+	"classPath": "src",
+	"releasenote": "First release.",
+	"version": "0.1.0",
+	"dependencies": {
+		"tink_core": ""
+	}
 }
