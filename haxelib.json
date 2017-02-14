@@ -1,8 +1,8 @@
 {
   "name": "submit",
-  "classPath": ".",
+  "classPath": "src",
   "main": "Prepare",
   "dependencies": {
-	"tink_core": ""
+     "tink_core": ""
   }
 }
