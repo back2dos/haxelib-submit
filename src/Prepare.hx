@@ -9,9 +9,7 @@ using Lambda;
 using StringTools;
 using haxe.Json;
 
-import haxe.io.Bytes;
-import haxe.io.BytesOutput;
-import haxe.io.Output;
+import haxe.io.*;
 import haxe.zip.Entry;
 import haxe.zip.Writer;
 import Sys.*;
@@ -64,9 +62,6 @@ class Prepare {
   }
 
   static function quit(reason:String):Dynamic {
-    // for (file in loadedFiles.keys())
-    //   file.saveContent(loadedFiles[file]);
-
     println(reason);
     exit(500);
     return null;
@@ -110,17 +105,6 @@ class Prepare {
     }
   }
 
-  static function format(value:Dynamic, ?indent = '') 
-    return
-      switch Type.typeof(value) {
-        case TObject:
-          '{\n  $indent' + [for (f in Reflect.fields(value)) '$f : '+format(Reflect.field(value, f), '  $indent')].join(',\n  $indent')+'\n$indent}';
-        case TClass(String): '"$value"';
-        case TClass(Array): 
-          '[\n  $indent' + (value : Array<Dynamic>).map(format.bind(_, '  $indent')).join(',\n  $indent')+'\n$indent]';
-        case _: Std.string(value);
-      }
-
   static function confirm(s:String) {
     println(s + ' (Y)es/(N)o/(C)ancel');
     while (true)
@@ -132,17 +116,17 @@ class Prepare {
       }
   }
 
-	static function main() {
-		var args = args();
-		#if interp
-		setCwd(args.pop());
-		#end
-		var library = switch args.shift() {
-			case null: '.';
-			case v: v;
-		}
+  static function main() {
+    var args = args();
+    #if interp
+    setCwd(args.pop());
+    #end
+    var library = switch args.shift() {
+      case null: '.';
+      case v: v;
+    }
 
-		setCwd(library);
+    setCwd(library);
     
     var info:{
       name: String,
@@ -203,7 +187,7 @@ class Prepare {
       info.version = ask('version', [info.version]);
       info.releasenote = ask('release note', commits);
       println('');
-      println(format(info));
+      println(info.stringify('  '));
       println('');
     } while (!confirm('Are these settings alright?'));
 
@@ -243,19 +227,19 @@ class Prepare {
 
     INFO.saveContent(info.stringify('\t'));
     
-		var bundle = '../bundle.zip';
+    var bundle = '../bundle.zip';
     
     if (bundle.exists())
       bundle.deleteFile();
-			
-		var a = new Archive();
-		a.add(INFO);
-		a.add(README);
-		a.add(info.classPath);
-		if (EXTRAS.exists())
-			a.add(EXTRAS);
-		bundle.saveBytes(a.getAll());
-		
+      
+    var a = new Archive();
+    a.add(INFO);
+    a.add(README);
+    a.add(info.classPath);
+    if (EXTRAS.exists())
+      a.add(EXTRAS);
+    bundle.saveBytes(a.getAll());
+    
     exec(['git', 'commit', '-a', '-m', 'Release ${info.version}']);
     exec('git tag ${info.version}');
 
@@ -276,38 +260,38 @@ class Prepare {
     println('Cleanup');
 
     bundle.deleteFile();
-	}
+  }
 }
 
 abstract Archive(List<Entry>) {
-	public function new() 
-		this = new List();				
-		
-	public function add(path:String)
-		if (path.isDirectory()) 
-			for (file in path.readDirectory()) 
-				add('$path/$file');
-		else {
-			var blob = path.getBytes();
-			this.push({
-				fileName: path,
-				fileSize : blob.length,
-				fileTime : path.stat().mtime,
-				compressed : false,
-				dataSize : blob.length,
-				data : blob,
-				crc32: null,//TODO: consider calculating this one
-			});
-		}			
-	
-	public function getAll():Bytes {
-		var o = new BytesOutput();
-		write(o);
-		return o.getBytes();
-	}
-	
-	public function write(o:Output) {
-		var w = new Writer(o);
-		w.write(this);
-	}
+  public function new() 
+    this = new List();        
+    
+  public function add(path:String)
+    if (path.isDirectory()) 
+      for (file in path.readDirectory()) 
+        add('$path/$file');
+    else {
+      var blob = path.getBytes();
+      this.push({
+        fileName: path,
+        fileSize : blob.length,
+        fileTime : path.stat().mtime,
+        compressed : false,
+        dataSize : blob.length,
+        data : blob,
+        crc32: null,//TODO: consider calculating this one
+      });
+    }      
+  
+  public function getAll():Bytes {
+    var o = new BytesOutput();
+    write(o);
+    return o.getBytes();
+  }
+  
+  public function write(o:Output) {
+    var w = new Writer(o);
+    w.write(this);
+  }
 }
