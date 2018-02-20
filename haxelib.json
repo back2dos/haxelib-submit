@@ -2,11 +2,13 @@
 	"main": "Prepare",
 	"name": "submit",
 	"classPath": "src",
-	"releasenote": "First release.",
-	"version": "0.1.0",
-  "license": "MIT",
-	"contributors": ["back2dos"],
 	"dependencies": {
 		"tink_core": ""
-	}
+	},
+	"contributors": [
+		"back2dos"
+	],
+	"version": "0.2.0",
+	"releasenote": "A number of small improvements.",
+	"license": "MIT"
 }
