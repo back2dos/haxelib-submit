@@ -232,6 +232,8 @@ class Prepare {
     if (bundle.exists())
       bundle.deleteFile();
       
+    println('Making Bundle');
+
     var a = new Archive();
     a.add(INFO);
     a.add(README);
@@ -243,7 +245,6 @@ class Prepare {
     exec(['git', 'commit', '-a', '-m', 'Release ${info.version}']);
     exec('git tag ${info.version}');
 
-    println('Making Bundle');
     
     println('Local Install');
     
@@ -253,10 +254,12 @@ class Prepare {
 
     exec('git push origin master --tags');
 
-    println('Submitting to haxelib');
 
-    exec('haxelib submit $bundle');
-
+    if (confirm('Submit to haxelib?')) {
+      println('Submitting to haxelib');
+      exec('haxelib submit $bundle');
+    }
+    
     println('Cleanup');
 
     bundle.deleteFile();
