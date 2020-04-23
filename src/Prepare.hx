@@ -195,9 +195,11 @@ class Prepare {
     function prefix(count:Int)
       return [for (i in 0...count) '\t'].join('')+'- ';
 
-    var content = load(README);
+    var content =
+      try load(README)
+      catch (e:Dynamic) null;
 
-    switch content.split(END) {
+    if (content != null) switch content.split(END) {
       case [pre, body]:
         var out = [pre.split(START)[0] + START];
 
