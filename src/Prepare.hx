@@ -18,7 +18,7 @@ abstract Command(Array<String>) from Array<String> {
   public var name(get, never):String;
   inline function get_name() return this[0];
 
-  public function run() 
+  public function run()
     return new sys.io.Process(this[0], this.slice(1));
 
   public function exec()
@@ -43,11 +43,11 @@ class Prepare {
     return loadedFiles[name] = name.getContent();
   }
 
-  static function exec(cmd:Command) 
+  static function exec(cmd:Command, ?exitOnError = true)
     switch cmd.exec() {
       case 0:
       default:
-        quit('error while running '+cmd.name);
+        if (exitOnError) quit('error while running '+cmd.name);
     }
 
   static function run(cmd:Command) {
@@ -83,12 +83,12 @@ class Prepare {
       else
         print('$data: ');
 
-      s = 
-        try 
+      s =
+        try
           stdin().readLine()
-        catch (e:Dynamic) 
+        catch (e:Dynamic)
           quit(Std.string(e));
-      
+
       switch Std.parseInt(s) {
         case null:
           if (s != '') return s;
@@ -127,7 +127,7 @@ class Prepare {
     }
 
     setCwd(library);
-    
+
     var info:{
       name: String,
       releasenote: String,
@@ -163,9 +163,9 @@ class Prepare {
         println('... everything up to date!');
     }
 
-    var since = 
+    var since =
       switch run('git tag').sure().toString().split('\n') {
-        case ['']: 
+        case ['']:
           println('No tags found yet\n');
           '';
         case tags:
@@ -175,14 +175,14 @@ class Prepare {
           println('Last tag: $tag\n');
           '$tag..HEAD ';
       }
-    
-    var commits = 
+
+    var commits =
       switch run('git --no-pager log -n 20 $since--format=%s').sure().toString().split('\n') {
-        case []: 
+        case []:
           quit('no changes found');
         case v: v.pop(); v;
       }
-    
+
     do {
       info.version = ask('version', [info.version]);
       info.releasenote = ask('release note', commits);
@@ -218,20 +218,20 @@ class Prepare {
         }
         out.push('');
         out.push(END + body);
-        
+
         README.saveContent(out.join('\n'));
 
-      default: 
+      default:
         // quit('missing $START');
     }
 
     INFO.saveContent(info.stringify('\t'));
-    
+
     var bundle = '../bundle.zip';
-    
+
     if (bundle.exists())
       bundle.deleteFile();
-      
+
     println('Making Bundle');
 
     var a = new Archive();
@@ -241,13 +241,13 @@ class Prepare {
     if (EXTRAS.exists())
       a.add(EXTRAS);
     bundle.saveBytes(a.getAll());
-    
-    exec(['git', 'commit', '-a', '-m', 'Release ${info.version}']);
+
+    exec(['git', 'commit', '-a', '-m', 'Release ${info.version}'], false);
     exec('git tag ${info.version}');
 
-    
+
     println('Local Install');
-    
+
     exec('haxelib local $bundle');
 
     println('Pushing');
@@ -259,7 +259,7 @@ class Prepare {
       println('Submitting to haxelib');
       exec('haxelib submit $bundle');
     }
-    
+
     println('Cleanup');
 
     bundle.deleteFile();
@@ -267,12 +267,12 @@ class Prepare {
 }
 
 abstract Archive(List<Entry>) {
-  public function new() 
-    this = new List();        
-    
+  public function new()
+    this = new List();
+
   public function add(path:String)
-    if (path.isDirectory()) 
-      for (file in path.readDirectory()) 
+    if (path.isDirectory())
+      for (file in path.readDirectory())
         add('$path/$file');
     else {
       var blob = path.getBytes();
@@ -285,14 +285,14 @@ abstract Archive(List<Entry>) {
         data : blob,
         crc32: null,//TODO: consider calculating this one
       });
-    }      
-  
+    }
+
   public function getAll():Bytes {
     var o = new BytesOutput();
     write(o);
     return o.getBytes();
   }
-  
+
   public function write(o:Output) {
     var w = new Writer(o);
     w.write(this);
