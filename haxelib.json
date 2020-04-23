@@ -8,7 +8,7 @@
 	"contributors": [
 		"back2dos"
 	],
-	"version": "0.2.0",
-	"releasenote": "A number of small improvements.",
+	"version": "0.2.1",
+	"releasenote": "Avoid crashing on some edge cases.",
 	"license": "MIT"
 }
